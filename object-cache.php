@@ -104,7 +104,7 @@ class WP_Object_Cache {
 
 	var $cache = array();
 	var $mc = array();
-	var $stats = array( 'get' => 0, 'get_time' => 0, 'add' => 0, 'add_time' => 0, 'delete' => 0, 'delete_time' => 0 );
+	var $stats = array( 'get' => 0, 'get_time' => 0, 'add' => 0, 'add_time' => 0, 'delete' => 0, 'delete_time' => 0, 'set' => 0, 'set_time' => 0 );
 	var $group_ops = array();
 
 	var $cache_enabled = true;
@@ -327,8 +327,7 @@ class WP_Object_Cache {
 
 		@ ++$this->stats['set'];
 		$this->stats['set_time'] += $time_taken;
-
-		
+		$this->group_ops[$group][] = "set $id";
 
 		return $result;
 	}
