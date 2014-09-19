@@ -220,10 +220,9 @@ class WP_Object_Cache {
 	                if ( NULL === $value )
                         	$value = false;
 			$this->cache[$key] = $value;
+			@ ++$this->stats['get'];
+			$this->group_ops[$group][] = "get $id";
 		}
-
-		@ ++$this->stats['get'];
-		$this->group_ops[$group][] = "get $id";
 
 		if ( 'checkthedatabaseplease' === $value ) {
 			unset( $this->cache[$key] );
