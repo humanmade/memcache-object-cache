@@ -104,7 +104,7 @@ class WP_Object_Cache {
 
 	var $cache = array();
 	var $mc = array();
-	var $stats = array();
+	var $stats = array( 'get' => 0, 'get_time' => 0, 'add' => 0, 'add_time' => 0, 'delete' => 0, 'delete_time' => 0 );
 	var $group_ops = array();
 
 	var $cache_enabled = true;
@@ -125,10 +125,14 @@ class WP_Object_Cache {
 
 		$mc =& $this->get_mc($group);
 		$expire = ($expire == 0) ? $this->default_expiration : $expire;
+		
+		$time = microtime(true);
 		$result = $mc->add($key, $data, false, $expire);
+		$time_taken = microtime(true) - $time;
 
 		if ( false !== $result ) {
 			@ ++$this->stats['add'];
+			$this->stats['add_time'] += $time_taken;
 			$this->group_ops[$group][] = "add $id";
 			$this->cache[$key] = $data;
 		}
@@ -182,9 +186,12 @@ class WP_Object_Cache {
 
 		$mc =& $this->get_mc($group);
 
+		$time = microtime(true);
 		$result = $mc->delete($key);
+		$time_taken = microtime(true) - $time;
 
 		@ ++$this->stats['delete'];
+		$this->stats['delete_time'] += $time_taken;
 		$this->group_ops[$group][] = "delete $id";
 
 		if ( false !== $result )
@@ -216,11 +223,18 @@ class WP_Object_Cache {
 		} else if ( in_array($group, $this->no_mc_groups) ) {
 			$this->cache[$key] = $value = false;
 		} else {
+
+			$time = microtime(true);
+
 			$value = $mc->get($key);
 	                if ( NULL === $value )
                         	$value = false;
+            
+            $time_taken = microtime(true) - $time;
+
 			$this->cache[$key] = $value;
 			@ ++$this->stats['get'];
+			$this->stats['get_time'] += $time_taken;
 			$this->group_ops[$group][] = "get $id";
 		}
 
@@ -306,13 +320,23 @@ class WP_Object_Cache {
 
 		$expire = ($expire == 0) ? $this->default_expiration : $expire;
 		$mc =& $this->get_mc($group);
+
+		$time = microtime(true);
 		$result = $mc->set($key, $data, false, $expire);
+		$time_taken = microtime(true) - $time;
+
+		@ ++$this->stats['set'];
+		$this->stats['set_time'] += $time_taken;
+
+		
 
 		return $result;
 	}
 
 	function switch_to_blog( $blog_id ) {
 		$blog_id = (int) $blog_id;
+		global $wpdb;
+		$table_prefix = $wpdb->prefix;
 		$this->blog_prefix = ( is_multisite() ? $blog_id : $table_prefix ) . ':';
 	}
 
@@ -333,6 +357,11 @@ class WP_Object_Cache {
 	function stats() {
 		echo "<p>\n";
 		foreach ( $this->stats as $stat => $n ) {
+
+			if ( ! $n ) {
+				continue;
+			}
+			
 			echo "<strong>$stat</strong> $n";
 			echo "<br/>\n";
 		}
