@@ -105,6 +105,7 @@ class WP_Object_Cache {
 	var $cache = array();
 	var $mc = array();
 	var $stats = array( 'get' => 0, 'get_time' => 0, 'add' => 0, 'add_time' => 0, 'delete' => 0, 'delete_time' => 0, 'set' => 0, 'set_time' => 0 );
+	var $disable_alloptions_cache = false;
 	var $group_ops = array();
 
 	var $cache_enabled = true;
@@ -212,6 +213,13 @@ class WP_Object_Cache {
 	}
 
 	function get($id, $group = 'default', $force = false) {
+
+		// Support for disabling the alloptions feature of get_option() etc
+		// as it's incredibly bad for race conditions.
+		if ( $this->disable_alloptions_cache && $id === 'alloptions' && $group === 'options' ) {
+			return array( 'disabled' => true );
+		}
+
 		$key = $this->key($id, $group);
 		$mc =& $this->get_mc($group);
 
@@ -428,6 +436,10 @@ class WP_Object_Cache {
 
 		$this->cache_hits =& $this->stats['get'];
 		$this->cache_misses =& $this->stats['add'];
+
+		if ( defined( 'MEMCACHED_DISABLE_ALLOPTIONS' ) && MEMCACHED_DISABLE_ALLOPTIONS ) {
+			$this->disable_alloptions_cache = true;
+		}
 	}
 }
 
