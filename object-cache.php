@@ -211,6 +211,17 @@ class WP_Object_Cache {
 		return $ret;
 	}
 
+	/**
+	 * Flush the local (in-memory) object cache
+	 *
+	 * Forces all future requests to fetch from memcache. Can be used to
+	 * alleviate memory pressure in long-running requests.
+	 */
+	public function flush_local() {
+		$this->cache = array();
+		$this->group_ops = array();
+	}
+
 	function get($id, $group = 'default', $force = false) {
 		$key = $this->key($id, $group);
 		$mc =& $this->get_mc($group);
