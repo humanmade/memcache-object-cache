@@ -58,6 +58,12 @@ function wp_cache_get($key, $group = '', $force = false) {
 	return $wp_object_cache->get($key, $group, $force);
 }
 
+function wp_cache_get_multi($groups, $force = false) {
+	global $wp_object_cache;
+
+	return $wp_object_cache->get_multi($groups, $force);
+}
+
 function wp_cache_init() {
 	global $wp_object_cache;
 
@@ -262,31 +268,46 @@ class WP_Object_Cache {
 		format: $get['group-name'] = array( 'key1', 'key2' );
 		*/
 		$return = array();
+		$to_get = array();
+
 		foreach ( $groups as $group => $ids ) {
 			$mc =& $this->get_mc($group);
+			$return[ $group ] = array();
+
 			foreach ( $ids as $id ) {
 				$key = $this->key($id, $group);
 				if ( isset($this->cache[$key]) ) {
 					if ( is_object( $this->cache[$key] ) )
-						$return[$key] = clone $this->cache[$key];
+						$return[ $group ][ $id ] = clone $this->cache[$key];
 					else
-						$return[$key] = $this->cache[$key];
+						$return[ $group ][ $id ] = $this->cache[$key];
 					continue;
 				} else if ( in_array($group, $this->no_mc_groups) ) {
-					$return[$key] = false;
+					$return[ $group ][ $id ] = false;
 					continue;
 				} else {
-					$return[$key] = $mc->get($key);
+					$to_get[ $key ] = array( $group, $id );
 				}
 			}
-			if ( $to_get ) {
-				$vals = $mc->get_multi( $to_get );
-				$return = array_merge( $return, $vals );
+		}
+
+		if ( $to_get ) {
+			$vals = $mc->get( array_keys( $to_get ) );
+
+			foreach ( $to_get as $key => $bits ) {
+				if ( ! isset( $vals[ $key ] ) ) {
+					continue;
+				}
+
+				list( $group, $id ) = $bits;
+
+				$return[ $group ][ $id ] = $vals[ $key ];
+				$this->cache[ $key ] = $vals[ $key ];
 			}
 		}
+
 		@ ++$this->stats['get_multi'];
 		$this->group_ops[$group][] = "get_multi $id";
-		$this->cache = array_merge( $this->cache, $return );
 		return $return;
 	}
 
