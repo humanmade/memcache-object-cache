@@ -252,7 +252,7 @@ class WP_Object_Cache {
 	}
 
 	function delete($id, $group = 'default') {
-		if ( $key === 'alloptions' && $group === 'options' ) {
+		if ( $id === 'alloptions' && $group === 'options' ) {
 			return $this->delete_alloptions();
 		}
 
