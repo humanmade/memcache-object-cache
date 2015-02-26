@@ -110,7 +110,7 @@ class WP_Object_Cache {
 
 	var $cache = array();
 	var $mc = array();
-	var $stats = array( 'get' => 0, 'get_time' => 0, 'add' => 0, 'add_time' => 0, 'delete' => 0, 'delete_time' => 0, 'set' => 0, 'set_time' => 0 );
+	var $stats = array();
 	var $group_ops = array();
 
 	var $cache_enabled = true;
@@ -280,6 +280,13 @@ class WP_Object_Cache {
 	}
 
 	function flush() {
+		// Did someone try and wipe our stats? >:(
+		// This occurs during unit tests, where WP reaches in and resets the
+		// stats array.
+		if ( empty( $this->stats ) ) {
+			$this->reset_stats();
+		}
+
 		// Don't flush if multi-blog.
 		if ( function_exists('is_site_admin') || defined('CUSTOM_USER_TABLE') && defined('CUSTOM_USER_META_TABLE') )
 			return true;
@@ -299,6 +306,10 @@ class WP_Object_Cache {
 	public function flush_local() {
 		$this->cache = array();
 		$this->group_ops = array();
+	}
+
+	protected function reset_stats() {
+		$this->stats = array( 'get' => 0, 'get_time' => 0, 'add' => 0, 'add_time' => 0, 'delete' => 0, 'delete_time' => 0, 'set' => 0, 'set_time' => 0 );
 	}
 
 	function get($id, $group = 'default', $force = false) {
@@ -539,6 +550,7 @@ class WP_Object_Cache {
 			$this->blog_prefix = ( is_multisite() ? $blog_id : $table_prefix ) . ':';
 		}
 
+		$this->reset_stats();
 		$this->cache_hits =& $this->stats['get'];
 		$this->cache_misses =& $this->stats['add'];
 	}
