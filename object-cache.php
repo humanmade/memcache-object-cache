@@ -117,6 +117,12 @@ class WP_Object_Cache {
 	var $default_expiration = 0;
 
 	public function get_alloptions() {
+		// Check our internal cache, to avoid the more expensive get-multi
+		$key = $this->key( 'alloptions', 'options' );
+		if ( isset( $this->cache[ $key ] ) ) {
+			return $this->cache[ $key ];
+		}
+
 		$keys = $this->get( 'alloptionskeys', 'options' );
 		if ( empty( $keys ) ) {
 			return array();
@@ -127,11 +133,14 @@ class WP_Object_Cache {
 			return array();
 		}
 
-		return $data['options'];
+		$this->cache[ $key ] = $data['options'];
+		return $this->cache[ $key ];
 	}
 
 	public function set_alloptions( $data ) {
-		$existing = $this->get_alloptions();
+		$internal_cache_key = $this->key( 'alloptions', 'options' );
+		$existing = $internal_cache = $this->get_alloptions();
+
 		$keys = $this->get( 'alloptionskeys', 'options' );
 		if ( empty( $keys ) ) {
 			$keys = array();
@@ -151,6 +160,8 @@ class WP_Object_Cache {
 			if ( ! $this->set( $key, $value, 'options' ) ) {
 				return false;
 			}
+
+			$internal_cache[ $key ] = $value;
 		}
 
 		// Remove deleted elements
@@ -166,17 +177,21 @@ class WP_Object_Cache {
 			if ( ! $this->delete( $key, 'options' ) ) {
 				return false;
 			}
+
+			unset( $internal_cache[ $key ] );
 		}
 
 		if ( ! $this->set( 'alloptionskeys', $keys, 'options' ) ) {
 			return false;
 		}
+		$this->cache[ $internal_cache_key ] = $internal_cache;
 
 		return true;
 	}
 
 	public function delete_alloptions() {
 		$key = $this->key( 'alloptions', 'options' );
+		$this->cache[ $key ] = array();
 
 		return $this->delete( 'alloptionskeys', 'options' );
 	}
