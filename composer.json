@@ -1,0 +1,21 @@
+
+{
+	"name": "humanmade/memcache-object-cache",
+	"description": "Memcached backend for the WP Object Cache.",
+	"homepage": "https://github.com/humanmade/memcache-object-cache",
+	"keywords": [
+		"wordpress","object-cache"
+	],
+	"license": "GPL-2.0+",
+	"authors": [
+		{
+			"name":"Human Made Limited",
+			"email":"support@humanmade.co.uk",
+			"homepage":"http://hmn.md/"
+		}
+	],
+	"type": "wordpress-muplugin",
+	"require": {
+		"composer/installers": "~1.0"
+	 }
+}
