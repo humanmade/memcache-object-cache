@@ -40,12 +40,12 @@ defined( 'WP_MEMCACHE_RETRY' ) or define( 'WP_MEMCACHE_RETRY', 15 );
 /**
  * Controls if memcache writes to log
  */
-defined( 'WP_MEMCACHE_LOGGING' ) or define( 'WP_MEMCACHE_LOGGING', false );
+defined( 'WP_MEMCACHE_DISABLE_LOGGING' ) or define( 'WP_MEMCACHE_DISABLE_LOGGING', false );
 
 /**
  * Disable / Enable memcache flushing
  */
-defined( 'WP_MEMCACHE_FLUSHING' ) or define( 'WP_MEMCACHE_FLUSHING', true );
+defined( 'WP_MEMCACHE_DISABLE_FLUSHING' ) or define( 'WP_MEMCACHE_DISABLE_FLUSHING', true );
 
 
 
@@ -336,7 +336,7 @@ class WP_Object_Cache {
 	function flush() {
 
 		// Return true is flushing is disabled
-		if ( ! WP_MEMCACHE_FLUSHING ) {
+		if ( ! WP_MEMCACHE_DISABLE_FLUSHING ) {
 			return true;
 		}
 
@@ -582,7 +582,7 @@ class WP_Object_Cache {
 	}
 
 	function failure_callback( $host, $port ) {
-		if ( WP_MEMCACHE_LOGGING ) {
+		if ( WP_MEMCACHE_DISABLE_LOGGING ) {
 			error_log( "Memcache Connection failure for $host:$port\n" );
 		}
 	}
