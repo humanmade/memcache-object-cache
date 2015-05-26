@@ -513,6 +513,16 @@ class WP_Object_Cache {
 		$mc =& $this->get_mc($group);
 
 		$time = microtime(true);
+
+		/**
+		 * If the expiry exceeds 30 days, we have to sent the expire
+		 * as a unix timestamp. This is because PHP Memcache extension
+		 * uses this hueristic.
+		 *
+		 * To make this consistant, we always use absolute unix timestamps.
+		 */
+		$expire += time();
+
 		$result = $mc->set($key, $data, false, $expire);
 		$time_taken = microtime(true) - $time;
 
