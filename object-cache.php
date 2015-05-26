@@ -158,7 +158,7 @@ class WP_Object_Cache {
 		}
 
 		$keys = $this->get( 'alloptionskeys', 'options' );
-		if ( empty( $keys ) ) {
+		if ( empty( $keys ) || ! is_array( $keys ) ) {
 			return array();
 		}
 
@@ -176,7 +176,7 @@ class WP_Object_Cache {
 		$existing = $internal_cache = $this->get_alloptions();
 
 		$keys = $this->get( 'alloptionskeys', 'options' );
-		if ( empty( $keys ) ) {
+		if ( empty( $keys ) || ! is_array( $keys ) ) {
 			$keys = array();
 		}
 
