@@ -521,7 +521,9 @@ class WP_Object_Cache {
 		 *
 		 * To make this consistant, we always use absolute unix timestamps.
 		 */
-		$expire += time();
+		if ( $expire ) {
+			$expire += time();
+		}
 
 		$result = $mc->set($key, $data, false, $expire);
 		$time_taken = microtime(true) - $time;
