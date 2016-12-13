@@ -599,7 +599,7 @@ class WP_Object_Cache {
 		}
 	}
 
-	function WP_Object_Cache() {
+	function __construct() {
 		global $memcached_servers, $blog_id, $table_prefix;
 
 		if ( isset( $memcached_servers ) ) {
