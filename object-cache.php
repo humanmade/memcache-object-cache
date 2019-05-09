@@ -594,7 +594,7 @@ class WP_Object_Cache {
 	}
 
 	function failure_callback( $host, $port ) {
-		if ( WP_MEMCACHE_DISABLE_LOGGING ) {
+		if ( !WP_MEMCACHE_DISABLE_LOGGING ) {
 			error_log( "Memcache Connection failure for $host:$port\n" );
 		}
 	}
